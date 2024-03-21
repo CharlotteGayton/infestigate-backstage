@@ -68,6 +68,11 @@ auth:
     # See https://backstage.io/docs/auth/guest/provider
     guest: {}
 
+endjinSbom:
+  storageAccountName: infstorageaccount
+  storageContainer: data
+  summaryFilePath: results/summary.csv
+
 scaffolder:
   # see https://backstage.io/docs/features/software-templates/configuration for software template options
 

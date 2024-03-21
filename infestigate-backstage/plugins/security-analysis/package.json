@@ -24,13 +24,19 @@
     "postpack": "backstage-cli package postpack"
   },
   "dependencies": {
+    "@azure/core-auth": "^1.5.0",
+    "@azure/storage-file-datalake": "^12.13.0",
+    "@backstage/catalog-model": "^1.4.3",
+    "@backstage/config": "^1.1.1",
     "@backstage/core-components": "^0.14.1",
     "@backstage/core-plugin-api": "^1.9.1",
     "@backstage/theme": "^0.5.2",
+    "@backstage/plugin-catalog-react": "^1.8.5",
     "@material-ui/core": "^4.9.13",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "4.0.0-alpha.61",
-    "react-use": "^17.2.4"
+    "react-use": "^17.2.4",
+    "csv-parse": "^5.5.2"
   },
   "peerDependencies": {
     "react": "^16.13.1 || ^17.0.0 || ^18.0.0"
@@ -43,6 +49,8 @@
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.0.0",
+    "@types/node": "*",
+    "cross-fetch": "^3.1.5",
     "msw": "^1.0.0"
   },
   "files": [
