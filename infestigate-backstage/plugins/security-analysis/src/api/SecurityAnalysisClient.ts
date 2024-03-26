@@ -1,22 +1,22 @@
 import { OAuthApi } from '@backstage/core-plugin-api';
 import { Config } from '@backstage/config';
-import { SbomComponent, EndjinSbomAnalysisApi, EntitySbomScoreSummary } from './types';
+import { SbomComponent, SecurityAnalysisApi, EntitySbomScoreSummary } from './types';
 import {
-  DataLakeServiceClient
+  DataLakeServiceClient, StorageSharedKeyCredential
 } from '@azure/storage-file-datalake';
 import { parse } from 'csv-parse/sync';
 import { BackstageAuthApiTokenCredential } from './BackstageAuthApiTokenCredential';
 
-export interface EndjinSbomAnalysisClientOptions {
+export interface SecurityAnalysisClientOptions {
   authApi: OAuthApi;
   config: Config;
 }
 
-export class EndjinSbomAnalysisClient implements EndjinSbomAnalysisApi {
+export class SecurityAnalysisClient implements SecurityAnalysisApi {
   private readonly authApi: OAuthApi;
   private readonly config: Config;
 
-  constructor(options: EndjinSbomAnalysisClientOptions) {
+  constructor(options: SecurityAnalysisClientOptions) {
     this.authApi = options.authApi;
     this.config = options.config;
   }
@@ -67,11 +67,10 @@ export class EndjinSbomAnalysisClient implements EndjinSbomAnalysisApi {
   }
 
   private async getContentFromDataLake(fileName: string): Promise<string> {
-    const dataLakeServiceClient = new DataLakeServiceClient(
-      `https://${this.config.get('endjinSbom.storageAccountName')}.dfs.core.windows.net`,
-      new BackstageAuthApiTokenCredential(this.authApi));
+    const url : string = `https://${this.config.get('endjinSbom.storageAccountName')}.dfs.core.windows.net`;
+    const dataLakeServiceClient = new DataLakeServiceClient(url, new BackstageAuthApiTokenCredential(this.authApi));
     const fileSystemClient = dataLakeServiceClient.getFileSystemClient(this.config.get('endjinSbom.storageContainer'));
-    const fileString = `endjinSbom.${fileName}`
+    const fileString = `endjinSbom.${fileName}`;
     const fileClient = fileSystemClient.getFileClient(this.config.get(fileString));
     const downloadResponse = await fileClient.read();
     const contentBlob = await downloadResponse.contentAsBlob!;

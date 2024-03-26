@@ -1,4 +1,4 @@
-import { createApiRef } from "@backstage/core-plugin-api"
+import { createApiRef } from "@backstage/core-plugin-api";
 
 export interface EntitySbomScoreSummary {
   Undefined: string;
@@ -14,7 +14,7 @@ export interface SbomComponent {
   copyright: string;
 }
 
-export interface EndjinSbomAnalysisApi {
+export interface SecurityAnalysisApi {
   getEntitySummary(repoName: string): Promise<EntitySbomScoreSummary | undefined>
 //   getEntityUnknownComponents(repoName: string): Promise<SbomComponent[]>
 //   getEntityRejectedComponents(repoName: string): Promise<SbomComponent[]>
@@ -22,6 +22,6 @@ export interface EndjinSbomAnalysisApi {
   getOverviewSummary(): Promise<EntitySbomScoreSummary[]>
 }
 
-export const endjinSbomAnalysisApiRef = createApiRef<EndjinSbomAnalysisApi>({
-  id: 'plugin.endjin-sbom-analysis.api'
+export const securityAnalysisApiRef = createApiRef<SecurityAnalysisApi>({
+    id: 'plugin.endjin-sbom-analysis.api'
 });
