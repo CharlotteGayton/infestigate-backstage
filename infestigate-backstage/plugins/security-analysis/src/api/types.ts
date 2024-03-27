@@ -15,7 +15,7 @@ export interface SbomComponent {
 }
 
 export interface SecurityAnalysisApi {
-  getEntitySummary(repoName: string): Promise<EntitySbomScoreSummary | undefined>
+  getEntitySummary(): Promise<EntitySbomScoreSummary | undefined>
 //   getEntityUnknownComponents(repoName: string): Promise<SbomComponent[]>
 //   getEntityRejectedComponents(repoName: string): Promise<SbomComponent[]>
 

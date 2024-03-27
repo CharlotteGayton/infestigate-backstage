@@ -6,6 +6,8 @@ import {
 } from '@azure/storage-file-datalake';
 import { parse } from 'csv-parse/sync';
 import { BackstageAuthApiTokenCredential } from './BackstageAuthApiTokenCredential';
+import path from 'path';
+import * as fs from "fs";
 
 export interface SecurityAnalysisClientOptions {
   authApi: OAuthApi;
@@ -27,10 +29,10 @@ export class SecurityAnalysisClient implements SecurityAnalysisApi {
    * @param repoName The name of the repo for the entity. This will have come from the `endjin.com/sbom-repo-name` annotation in the manifest file.
    * @returns An EntitySbomScoreSummary object containing the summary of accepted/unknown/rejected component licences.
    */
-  public async getEntitySummary(repoName: string): Promise<EntitySbomScoreSummary | undefined> {
+  public async getEntitySummary(): Promise<EntitySbomScoreSummary | undefined> {
     const content = await this.getContentFromDataLake('summaryFilePath')
 
-    return getEntitySbomScores(content, repoName);
+    return getEntitySbomScores(content);
   }
 
   /**
@@ -67,21 +69,25 @@ export class SecurityAnalysisClient implements SecurityAnalysisApi {
   }
 
   private async getContentFromDataLake(fileName: string): Promise<string> {
-    const url : string = `https://${this.config.get('endjinSbom.storageAccountName')}.dfs.core.windows.net`;
-    const dataLakeServiceClient = new DataLakeServiceClient(url, new BackstageAuthApiTokenCredential(this.authApi));
-    const fileSystemClient = dataLakeServiceClient.getFileSystemClient(this.config.get('endjinSbom.storageContainer'));
-    const fileString = `endjinSbom.${fileName}`;
-    const fileClient = fileSystemClient.getFileClient(this.config.get(fileString));
-    const downloadResponse = await fileClient.read();
-    const contentBlob = await downloadResponse.contentAsBlob!;
-    return await contentBlob.text();
+    // const url : string = `https://${this.config.get('endjinSbom.storageAccountName')}.dfs.core.windows.net`;
+    // const dataLakeServiceClient = new DataLakeServiceClient(url, new BackstageAuthApiTokenCredential(this.authApi));
+    // const fileSystemClient = dataLakeServiceClient.getFileSystemClient(this.config.get('endjinSbom.storageContainer'));
+    // const fileString = `endjinSbom.${fileName}`;
+    // const fileClient = fileSystemClient.getFileClient(this.config.get(fileString));
+    // const downloadResponse = await fileClient.read();
+    // const contentBlob = await downloadResponse.contentAsBlob!;
+    // return await contentBlob.text();
+
+    const csvFilePath = path.resolve(__dirname, 'summary_report.csv');
+    const fileContent = fs.readFileSync(csvFilePath, { encoding: 'utf-8' });
+    return await fileContent;
   }
 }
 
-function getEntitySbomScores(rawData: string, repoName: string): EntitySbomScoreSummary | undefined {
+function getEntitySbomScores(rawData: string): EntitySbomScoreSummary | undefined {
   const parsedData = parse(rawData, { columns: true, objname: 'repo_name' });
 
-  const scores = parsedData ? parsedData[repoName] : undefined;
+  const scores = parsedData ? parsedData : undefined;
 
   if (scores) {
     return {
