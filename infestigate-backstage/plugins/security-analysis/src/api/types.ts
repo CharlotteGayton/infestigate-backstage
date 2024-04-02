@@ -1,7 +1,7 @@
 import { createApiRef } from "@backstage/core-plugin-api";
 
 export interface EntitySbomScoreSummary {
-  Undefined: string;
+  Undefined: number;
   Low: number;
   Moderate: number;
   High: number;
@@ -19,7 +19,7 @@ export interface SecurityAnalysisApi {
 //   getEntityUnknownComponents(repoName: string): Promise<SbomComponent[]>
 //   getEntityRejectedComponents(repoName: string): Promise<SbomComponent[]>
 
-  getOverviewSummary(): Promise<EntitySbomScoreSummary[]>
+  // getOverviewSummary(): Promise<EntitySbomScoreSummary[]>
 }
 
 export const securityAnalysisApiRef = createApiRef<SecurityAnalysisApi>({

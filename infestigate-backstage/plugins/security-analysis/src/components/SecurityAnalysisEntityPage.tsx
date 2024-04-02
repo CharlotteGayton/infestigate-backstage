@@ -27,11 +27,13 @@ const OverviewOfAllReposContent = () => {
     const classes = useStyles();
     const securityAnalysisApi = useApi(securityAnalysisApiRef);
 
-    const { value } = useAsync(() => securityAnalysisApi.getEntitySummary());
+    const { value } = useAsync(async () => { return await securityAnalysisApi.getEntitySummary() });
 
     if (!value) {
         return <Progress />;
     }
+
+    console.log(value)
 
     const columns = [
           { field: 'severity', title: 'Severity' },
@@ -46,19 +48,19 @@ const OverviewOfAllReposContent = () => {
       },
       {
         severity: <StatusWarning>High</StatusWarning>,
-        vulnerabilities: 'CPU utilization at 90%',
+        vulnerabilities: value.High,
       },
       {
         severity: <StatusPending>Moderate</StatusPending>,
-        vulnerabilities: 'Service could not be created',
+        vulnerabilities: value.Moderate,
       },
       {
         severity: <StatusRunning>Low</StatusRunning>,
-        vulnerabilities: 'Build for PR #34 aborted',
+        vulnerabilities: value.Low,
       },
       {
         severity: <StatusAborted>Unspecified</StatusAborted>,
-        vulnerabilities: 'Job is waiting',
+        vulnerabilities: value.Undefined,
       },
     ];
 

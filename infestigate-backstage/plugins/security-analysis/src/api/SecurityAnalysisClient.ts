@@ -8,6 +8,7 @@ import { parse } from 'csv-parse/sync';
 import { BackstageAuthApiTokenCredential } from './BackstageAuthApiTokenCredential';
 import path from 'path';
 import * as fs from "fs";
+import { readFileSync } from "fs"
 
 export interface SecurityAnalysisClientOptions {
   authApi: OAuthApi;
@@ -30,7 +31,7 @@ export class SecurityAnalysisClient implements SecurityAnalysisApi {
    * @returns An EntitySbomScoreSummary object containing the summary of accepted/unknown/rejected component licences.
    */
   public async getEntitySummary(): Promise<EntitySbomScoreSummary | undefined> {
-    const content = await this.getContentFromDataLake('summaryFilePath')
+    const content = await this.getContentFromDataLake()
 
     return getEntitySbomScores(content);
   }
@@ -57,18 +58,18 @@ export class SecurityAnalysisClient implements SecurityAnalysisApi {
   //   return getEntitySbomComponents(rejectedComponentsContent, repoName);  
   // }
 
-  /**
-   * Gets the overview summary for all known components.
-   * 
-   * @returns A list of EntitySbomScoreSummary.
-   */
-  public async getOverviewSummary(): Promise<EntitySbomScoreSummary[]> {
-    const content = await this.getContentFromDataLake('summaryFilePath')
+  // /**
+  //  * Gets the overview summary for all known components.
+  //  * 
+  //  * @returns A list of EntitySbomScoreSummary.
+  //  */
+  // public async getOverviewSummary(): Promise<EntitySbomScoreSummary[]> {
+  //   const content = await this.getContentFromDataLake()
 
-    return getRepoSbomScoresOverview(content);
-  }
+  //   return getRepoSbomScoresOverview(content);
+  // }
 
-  private async getContentFromDataLake(fileName: string): Promise<string> {
+  private async getContentFromDataLake(): Promise<EntitySbomScoreSummary> {
     // const url : string = `https://${this.config.get('endjinSbom.storageAccountName')}.dfs.core.windows.net`;
     // const dataLakeServiceClient = new DataLakeServiceClient(url, new BackstageAuthApiTokenCredential(this.authApi));
     // const fileSystemClient = dataLakeServiceClient.getFileSystemClient(this.config.get('endjinSbom.storageContainer'));
@@ -77,17 +78,27 @@ export class SecurityAnalysisClient implements SecurityAnalysisApi {
     // const downloadResponse = await fileClient.read();
     // const contentBlob = await downloadResponse.contentAsBlob!;
     // return await contentBlob.text();
+    console.log('hello2');
+    document.querySelector('a')
+    // const fileContent = readFileSync("summary_report.json").toString();
+    // console.log('hello' + fileContent)
+    // if (fileContent.length == 0) {
+    //   console.log("Summary report is empty");
+    // }
 
-    const csvFilePath = path.resolve(__dirname, 'summary_report.csv');
-    const fileContent = fs.readFileSync(csvFilePath, { encoding: 'utf-8' });
-    return await fileContent;
+    // const fileContent = path.resolve(__dirname, 'summary_report.json');
+    const response = await fetch("/summary_report.json");
+    const fileContent = await response.json() as EntitySbomScoreSummary;
+    // const content = fetch("summary_report.json").then((r) r.json());
+    // const fileContent = '{"unspecified": 1}';
+    // const fileContent = fs.readFileSync('summary_report.csv', { encoding: 'utf-8' });
+    return fileContent;
   }
 }
 
-function getEntitySbomScores(rawData: string): EntitySbomScoreSummary | undefined {
-  const parsedData = parse(rawData, { columns: true, objname: 'repo_name' });
-
-  const scores = parsedData ? parsedData : undefined;
+function getEntitySbomScores(rawData: EntitySbomScoreSummary): EntitySbomScoreSummary | undefined {
+  // const parsedData = JSON.parse(rawData);
+  const scores = rawData
 
   if (scores) {
     return {
@@ -98,8 +109,9 @@ function getEntitySbomScores(rawData: string): EntitySbomScoreSummary | undefine
       Critical: scores.Critical 
     };
   }
-    
-  return undefined;
+  else {
+    return undefined;
+  }
 }
 
 function getEntitySbomComponents(rawData: string, repoName: string): SbomComponent[] {
@@ -120,21 +132,21 @@ function getEntitySbomComponents(rawData: string, repoName: string): SbomCompone
   return [];
 }
 
-function getRepoSbomScoresOverview(rawData: string): EntitySbomScoreSummary[] {
-  const parsedData = parse(rawData, { columns: true });
+// function getRepoSbomScoresOverview(rawData: EntitySbomScoreSummary): EntitySbomScoreSummary[] {
+//   const parsedData = parse(rawData, { columns: true });
 
-  if (parsedData) {
-    const result = parsedData
-      .map((option: { Undefined: any; Low: any; Moderate: any; High: any; Critical: any;}) => ({
-        undefined: option.Undefined,
-        low: option.Low,
-        moderate: option.Moderate,
-        high: option.High,
-        critical: option.Critical
-      }));
+//   if (parsedData) {
+//     const result = parsedData
+//       .map((option: { Undefined: any; Low: any; Moderate: any; High: any; Critical: any;}) => ({
+//         undefined: option.Undefined,
+//         low: option.Low,
+//         moderate: option.Moderate,
+//         high: option.High,
+//         critical: option.Critical
+//       }));
 
-    return result;
-  }
+//     return result;
+//   }
 
-  return [];
-}
+//   return [];
+// }
