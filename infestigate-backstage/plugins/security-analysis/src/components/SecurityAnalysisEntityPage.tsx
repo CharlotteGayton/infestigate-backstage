@@ -14,7 +14,7 @@ export default {
 
 const useStyles = makeStyles(theme => ({
   container: {
-    width: 850,
+    width: 1100,
   },
   empty: {
     padding: theme.spacing(2),
@@ -64,6 +64,13 @@ const OverviewOfAllReposContent = () => {
       },
     ];
 
+    const filters: TableFilter[] = [
+      {
+        column: 'Severity',
+        type: 'select',
+      },
+    ];
+
     return (
     <div className={classes.container}>
         <InfoCard title="Available status types" noPadding>
@@ -75,8 +82,58 @@ const OverviewOfAllReposContent = () => {
             }}
             data={data}
             columns={columns}
+            filters={filters}
             />
         </InfoCard>
+    </div>)
+};
+
+const VulnerabilityReportContent = () => {
+  const classes = useStyles();
+  const securityAnalysisApi = useApi(securityAnalysisApiRef);
+  const { value } = useAsync(async () => { return await securityAnalysisApi.getVulnerabilityReport() });
+
+  if (!value) {
+      return <Progress />;
+  }
+
+  console.log(value)
+
+  const columns: TableColumn[] = [
+    {
+      title: 'VulnerabilityID',
+      field: 'VulnerabilityID',
+    },
+    {
+      title: 'InstalledVersion',
+      field: 'InstalledVersion',
+    },
+    {
+      title: 'FixedVersion',
+      field: 'FixedVersion',
+    },
+    {
+      title: 'Title',
+      field: 'Title',
+    },
+    {
+      title: 'Severity',
+      field: 'Severity',
+    },
+    {
+      title: 'SBOM Name',
+      field: 'sbom_name',
+    },
+  ];
+
+  return (
+    <div className={classes.container}>
+        <Table
+        options={{ paging: false }}
+        data={value}
+        columns={columns}
+        title="Vulnerabilities"
+        />
     </div>)
 };
 
@@ -88,7 +145,10 @@ export const SecurityAnalysisOverviewPageContent = () => {
                 <Header title='SBOM Analysis Overview'/>
             </Grid>    
             <Grid item md={12}>
-                <OverviewOfAllReposContent />
+              <OverviewOfAllReposContent />
+            </Grid>
+            <Grid item md={14}>
+              <VulnerabilityReportContent />
             </Grid>
             </Grid>  
         </Page>

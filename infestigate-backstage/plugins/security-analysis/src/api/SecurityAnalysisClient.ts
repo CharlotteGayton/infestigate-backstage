@@ -1,6 +1,6 @@
 import { OAuthApi } from '@backstage/core-plugin-api';
 import { Config } from '@backstage/config';
-import { SbomComponent, SecurityAnalysisApi, EntitySbomScoreSummary } from './types';
+import { SbomComponent, SecurityAnalysisApi, EntitySbomScoreSummary, EntityVulnerabilityReport } from './types';
 import {
   DataLakeServiceClient, StorageSharedKeyCredential
 } from '@azure/storage-file-datalake';
@@ -31,122 +31,99 @@ export class SecurityAnalysisClient implements SecurityAnalysisApi {
    * @returns An EntitySbomScoreSummary object containing the summary of accepted/unknown/rejected component licences.
    */
   public async getEntitySummary(): Promise<EntitySbomScoreSummary | undefined> {
-    const content = await this.getContentFromDataLake()
+    const content = await this.getContentFromDataLakeSummary("/summary_report.json");
 
-    return getEntitySbomScores(content);
+    return content;
+  }
+  
+  public async getVulnerabilityReport(): Promise<EntityVulnerabilityReport[] | undefined> {
+    const content = await this.getContentFromDataLakeVulnerability("/vulnerability_report_simplified.json");
+
+    console.log(content);
+
+    return content;
   }
 
-  /**
-   * Gets the list of unknown components for a single entity.
-   * 
-   * @param repoName The name of the repo for the entity. This will have come from the `endjin.com/sbom-repo-name` annotation in the manifest file.
-   * @returns A list of SbomComponents.
-   */
-  // public async getEntityUnknownComponents(repoName:string): Promise<SbomComponent[]> {
-  //   const unknownComponentsContent = await this.getContentFromDataLake('unknownComponentsFilePath');
-  //   return getEntitySbomComponents(unknownComponentsContent, repoName);
-  // }
-
-  /**
-   * Gets the list of rejected components for a single entity.
-   * 
-   * @param repoName The name of the repo for the entity. This will have come from the `endjin.com/sbom-repo-name` annotation in the manifest file.
-   * @returns A list of SbomComponents.
-   */
-  // public async getEntityRejectedComponents(repoName:string): Promise<SbomComponent[]> {
-  //   const rejectedComponentsContent = await this.getContentFromDataLake('rejectedComponentsFilePath');
-  //   return getEntitySbomComponents(rejectedComponentsContent, repoName);  
-  // }
-
-  // /**
-  //  * Gets the overview summary for all known components.
-  //  * 
-  //  * @returns A list of EntitySbomScoreSummary.
-  //  */
-  // public async getOverviewSummary(): Promise<EntitySbomScoreSummary[]> {
-  //   const content = await this.getContentFromDataLake()
-
-  //   return getRepoSbomScoresOverview(content);
-  // }
-
-  private async getContentFromDataLake(): Promise<EntitySbomScoreSummary> {
+  private async getContentFromDataLakeSummary(fileName: string): Promise<EntitySbomScoreSummary> {
     // const url : string = `https://${this.config.get('endjinSbom.storageAccountName')}.dfs.core.windows.net`;
     // const dataLakeServiceClient = new DataLakeServiceClient(url, new BackstageAuthApiTokenCredential(this.authApi));
     // const fileSystemClient = dataLakeServiceClient.getFileSystemClient(this.config.get('endjinSbom.storageContainer'));
-    // const fileString = `endjinSbom.${fileName}`;
+    // const fileString = `endjinSbom.${'summary_report.json'}`;
     // const fileClient = fileSystemClient.getFileClient(this.config.get(fileString));
     // const downloadResponse = await fileClient.read();
     // const contentBlob = await downloadResponse.contentAsBlob!;
-    // return await contentBlob.text();
-    console.log('hello2');
-    document.querySelector('a')
-    // const fileContent = readFileSync("summary_report.json").toString();
-    // console.log('hello' + fileContent)
-    // if (fileContent.length == 0) {
-    //   console.log("Summary report is empty");
-    // }
+    // const contentText = await contentBlob.text();
+    
+    // return JSON.parse(contentText) as EntitySbomScoreSummary;
 
-    // const fileContent = path.resolve(__dirname, 'summary_report.json');
-    const response = await fetch("/summary_report.json");
+    const response = await fetch(fileName);
     const fileContent = await response.json() as EntitySbomScoreSummary;
-    // const content = fetch("summary_report.json").then((r) r.json());
-    // const fileContent = '{"unspecified": 1}';
-    // const fileContent = fs.readFileSync('summary_report.csv', { encoding: 'utf-8' });
+
+    return fileContent;
+  }
+  private async getContentFromDataLakeVulnerability(fileName: string): Promise<EntityVulnerabilityReport[]> {
+    // const url : string = `https://${this.config.get('endjinSbom.storageAccountName')}.dfs.core.windows.net`;
+    // const dataLakeServiceClient = new DataLakeServiceClient(url, new BackstageAuthApiTokenCredential(this.authApi));
+    // const fileSystemClient = dataLakeServiceClient.getFileSystemClient(this.config.get('endjinSbom.storageContainer'));
+    // const fileString = `endjinSbom.${'summary_report.json'}`;
+    // const fileClient = fileSystemClient.getFileClient(this.config.get(fileString));
+    // const downloadResponse = await fileClient.read();
+    // const contentBlob = await downloadResponse.contentAsBlob!;
+    // const contentText = await contentBlob.text();
+    
+    // return JSON.parse(contentText) as EntitySbomScoreSummary;
+
+    const response = await fetch(fileName).then(data => data.json());
+
+    console.log(response);
+
+    const fileContent = response as EntityVulnerabilityReport[];
+
+    console.log(fileContent);
+
     return fileContent;
   }
 }
 
-function getEntitySbomScores(rawData: EntitySbomScoreSummary): EntitySbomScoreSummary | undefined {
-  // const parsedData = JSON.parse(rawData);
-  const scores = rawData
+// function getEntitySbomScores(rawData: string): EntitySbomScoreSummary | undefined {
+//   const parsedData = JSON.parse(rawData);
+//   const scores = parsedData
 
-  if (scores) {
-    return {
-      Undefined: scores.Undefined,
-      Low: scores.Low,
-      Moderate: scores.Moderate,
-      High: scores.High,
-      Critical: scores.Critical 
-    };
-  }
-  else {
-    return undefined;
-  }
-}
-
-function getEntitySbomComponents(rawData: string, repoName: string): SbomComponent[] {
-  const parsedData = parse(rawData, { columns: true });
-  const components = parsedData.filter((option: { [key: string]: string }) => option.repo_name === repoName);
-
-  if (components) {
-    const result = parsedData
-      .filter((option: { repo_name: any; }) => option.repo_name === repoName)
-      .map((option: { Name: any; License: any; CopyrightNotice: any; }) => ({
-        componentName: option.Name,
-        license: option.License,
-        copyright: option.CopyrightNotice
-      }));
-    return result;
-  }
-
-  return [];
-}
-
-// function getRepoSbomScoresOverview(rawData: EntitySbomScoreSummary): EntitySbomScoreSummary[] {
-//   const parsedData = parse(rawData, { columns: true });
-
-//   if (parsedData) {
-//     const result = parsedData
-//       .map((option: { Undefined: any; Low: any; Moderate: any; High: any; Critical: any;}) => ({
-//         undefined: option.Undefined,
-//         low: option.Low,
-//         moderate: option.Moderate,
-//         high: option.High,
-//         critical: option.Critical
-//       }));
-
-//     return result;
+//   if (scores) {
+//     return {
+//       Undefined: scores.Undefined,
+//       Low: scores.Low,
+//       Moderate: scores.Moderate,
+//       High: scores.High,
+//       Critical: scores.Critical 
+//     };
 //   }
+//   else {
+//     return undefined;
+//   }
+// }
 
-//   return [];
+// function getVulnerabilityData(rawData: string): EntityVulnerabilityReport | undefined {
+//   const parsedData = JSON.parse(rawData);
+//   const scores = parsedData
+
+//   if (scores) {
+//     return {
+//       VulnerabilityID: scores.VulnerabilityID,
+//       PkgID: scores.PkgID,
+//       PkName: scores.PkName,
+//       InstalledVersion: scores.InstalledVersion,
+//       FixedVersion: scores.FixedVersion,
+//       SeveritySource: scores.SeveritySource,
+//       PrimaryURL: scores.PrimaryURL,
+//       Title: scores.Title,
+//       Description: scores.Description,
+//       Severity: scores.Severity,
+//       CweIDs: scores.CweIDs,
+//       sbom_name: scores.sbom_name
+//     };
+//   }
+//   else {
+//     return undefined;
+//   }
 // }

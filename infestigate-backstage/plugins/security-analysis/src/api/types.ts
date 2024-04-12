@@ -14,12 +14,24 @@ export interface SbomComponent {
   copyright: string;
 }
 
+export interface EntityVulnerabilityReport {
+  VulnerabilityID: String;
+  PkgID: String;
+  PkName: String
+  InstalledVersion: String; 
+  FixedVersion: String; 
+  SeveritySource: String;
+  PrimaryURL: String;
+  Title: String;
+  Description: String;
+  Severity: String;
+  CweIDs: Array<String>;
+  sbom_name: String;
+}
+
 export interface SecurityAnalysisApi {
   getEntitySummary(): Promise<EntitySbomScoreSummary | undefined>
-//   getEntityUnknownComponents(repoName: string): Promise<SbomComponent[]>
-//   getEntityRejectedComponents(repoName: string): Promise<SbomComponent[]>
-
-  // getOverviewSummary(): Promise<EntitySbomScoreSummary[]>
+  getVulnerabilityReport(): Promise<EntityVulnerabilityReport[] | undefined>
 }
 
 export const securityAnalysisApiRef = createApiRef<SecurityAnalysisApi>({
