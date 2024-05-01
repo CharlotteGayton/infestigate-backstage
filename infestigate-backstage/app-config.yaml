@@ -31,6 +31,9 @@ backend:
     client: better-sqlite3
     connection: ':memory:'
   # workingDirectory: /tmp # Use this to configure a working directory for the scaffolder, defaults to the OS temp-dir
+  reading:
+    allow: 
+      - host: endsynapsedatalake.blob.core.windows.net
 
 integrations:
   github:
@@ -42,6 +45,9 @@ integrations:
     # - host: ghe.example.net
     #   apiBaseUrl: https://ghe.example.net/api/v3
     #   token: ${GHE_TOKEN}
+  azure:
+    - host: dev.azure.com
+      token: ${AZURE_TOKEN}
 
 proxy:
   ### Example for how to add a proxy endpoint for the frontend.
@@ -64,9 +70,25 @@ techdocs:
 
 auth:
   # see https://backstage.io/docs/auth/ to learn about auth providers
+  environment: development
   providers:
-    # See https://backstage.io/docs/auth/guest/provider
-    guest: {}
+    microsoft:
+      development:
+        # clientId: ${AZURE_CLIENT_ID}
+        # clientSecret: ${AZURE_CLIENT_SECRET}
+        # tenantId: ${AZURE_TENANT_ID}
+        clientId: ${AZURE_CLIENT_ID}
+        clientSecret: ${AZURE_CLIENT_SECRET}
+        tenantId: ${AZURE_TENANT_ID}
+    github:
+      development:
+        clientId: ${GITHUB_CLIENT_ID}
+        clientSecret: ${GITHUB_CLIENT_SECRET}
+
+endjinSbom:
+  storageAccountName: infstorageaccount
+  storageContainer: data
+  summaryFilePath: results/summary.csv
 
 scaffolder:
   # see https://backstage.io/docs/features/software-templates/configuration for software template options
