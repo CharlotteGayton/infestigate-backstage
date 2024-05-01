@@ -113,8 +113,8 @@ const VulnerabilityReportContent = () => {
       field: 'FixedVersion',
     },
     {
-      title: 'Title',
-      field: 'Title',
+      title: 'PkgName',
+      field: 'PkgName',
     },
     {
       title: 'Severity',

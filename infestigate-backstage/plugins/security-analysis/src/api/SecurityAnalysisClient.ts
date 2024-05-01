@@ -45,16 +45,6 @@ export class SecurityAnalysisClient implements SecurityAnalysisApi {
   }
 
   private async getContentFromDataLakeSummary(fileName: string): Promise<EntitySbomScoreSummary> {
-    // const url : string = `https://${this.config.get('endjinSbom.storageAccountName')}.dfs.core.windows.net`;
-    // const dataLakeServiceClient = new DataLakeServiceClient(url, new BackstageAuthApiTokenCredential(this.authApi));
-    // const fileSystemClient = dataLakeServiceClient.getFileSystemClient(this.config.get('endjinSbom.storageContainer'));
-    // const fileString = `endjinSbom.${'summary_report.json'}`;
-    // const fileClient = fileSystemClient.getFileClient(this.config.get(fileString));
-    // const downloadResponse = await fileClient.read();
-    // const contentBlob = await downloadResponse.contentAsBlob!;
-    // const contentText = await contentBlob.text();
-    
-    // return JSON.parse(contentText) as EntitySbomScoreSummary;
 
     const response = await fetch(fileName);
     const fileContent = await response.json() as EntitySbomScoreSummary;
@@ -62,16 +52,6 @@ export class SecurityAnalysisClient implements SecurityAnalysisApi {
     return fileContent;
   }
   private async getContentFromDataLakeVulnerability(fileName: string): Promise<EntityVulnerabilityReport[]> {
-    // const url : string = `https://${this.config.get('endjinSbom.storageAccountName')}.dfs.core.windows.net`;
-    // const dataLakeServiceClient = new DataLakeServiceClient(url, new BackstageAuthApiTokenCredential(this.authApi));
-    // const fileSystemClient = dataLakeServiceClient.getFileSystemClient(this.config.get('endjinSbom.storageContainer'));
-    // const fileString = `endjinSbom.${'summary_report.json'}`;
-    // const fileClient = fileSystemClient.getFileClient(this.config.get(fileString));
-    // const downloadResponse = await fileClient.read();
-    // const contentBlob = await downloadResponse.contentAsBlob!;
-    // const contentText = await contentBlob.text();
-    
-    // return JSON.parse(contentText) as EntitySbomScoreSummary;
 
     const response = await fetch(fileName).then(data => data.json());
 
@@ -84,46 +64,3 @@ export class SecurityAnalysisClient implements SecurityAnalysisApi {
     return fileContent;
   }
 }
-
-// function getEntitySbomScores(rawData: string): EntitySbomScoreSummary | undefined {
-//   const parsedData = JSON.parse(rawData);
-//   const scores = parsedData
-
-//   if (scores) {
-//     return {
-//       Undefined: scores.Undefined,
-//       Low: scores.Low,
-//       Moderate: scores.Moderate,
-//       High: scores.High,
-//       Critical: scores.Critical 
-//     };
-//   }
-//   else {
-//     return undefined;
-//   }
-// }
-
-// function getVulnerabilityData(rawData: string): EntityVulnerabilityReport | undefined {
-//   const parsedData = JSON.parse(rawData);
-//   const scores = parsedData
-
-//   if (scores) {
-//     return {
-//       VulnerabilityID: scores.VulnerabilityID,
-//       PkgID: scores.PkgID,
-//       PkName: scores.PkName,
-//       InstalledVersion: scores.InstalledVersion,
-//       FixedVersion: scores.FixedVersion,
-//       SeveritySource: scores.SeveritySource,
-//       PrimaryURL: scores.PrimaryURL,
-//       Title: scores.Title,
-//       Description: scores.Description,
-//       Severity: scores.Severity,
-//       CweIDs: scores.CweIDs,
-//       sbom_name: scores.sbom_name
-//     };
-//   }
-//   else {
-//     return undefined;
-//   }
-// }
